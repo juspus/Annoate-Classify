@@ -1,5 +1,5 @@
 .*.db
 
-/dist/
-/build/
-/ano-class/
+dist/
+build/
+ano-class/
