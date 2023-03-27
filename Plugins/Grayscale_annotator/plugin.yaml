@@ -1,0 +1,19 @@
+name: "Gray scale annotator"
+alias: "grayscale-agent"
+creator: "Justas Puodzius"
+runtime:
+  main: "gray-scale.py"
+
+description: "Annotation agent used for evaluating if image is grayscale."
+version: "0.0.1"
+repository: "http/repo/repo.com"
+annotation_agent: true
+variables:
+  - name: "is_grayscale"
+    vtype: "bool"
+
+requirements:
+  - name: "numpy"
+    version: "1.24.2"
+  - name: "opencv-python"
+    version: "4.6.0.66"

@@ -1,0 +1,17 @@
+name: "Test Filter Agent"
+alias: "test-filter-agent"
+creator: "Justas Puodzius"
+runtime:
+  main: "testFilterA.py"
+
+description: "Test agent for testing."
+version: "0.0.1"
+repository: "http/repo/repo.com"
+annotation_agent: false
+configurations:
+  - name: "evaluation"
+    vtype: "string"
+
+requirements:
+  - name: "boolean-parser"
+    version: "0.1.3"

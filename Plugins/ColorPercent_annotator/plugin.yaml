@@ -1,0 +1,23 @@
+name: "Color percent annotator"
+alias: "color-percent-agent"
+creator: "Justas Puodzius"
+runtime:
+  main: "color.py"
+
+description: "Annotation agent used for evaluating color percent."
+version: "0.0.1"
+repository: "http/repo/repo.com"
+annotation_agent: true
+variables:
+  - name: "red_perc"
+    vtype: "double"
+  - name: "green_perc"
+    vtype: "double"
+  - name: "blue_perc"
+    vtype: "double"
+
+requirements:
+  - name: "numpy"
+    version: "1.24.2"
+  - name: "opencv-python"
+    version: "4.6.0.66"

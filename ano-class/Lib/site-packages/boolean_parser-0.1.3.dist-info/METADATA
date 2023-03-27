@@ -1,0 +1,58 @@
+Metadata-Version: 2.1
+Name: boolean-parser
+Version: 0.1.3
+Summary: Package for parsing strings containing conditional boolean logic
+Home-page: https://github.com/havok2063/boolean_parser
+Author: Brian Cherinka
+Author-email: havok2063@gmail.com
+License: BSD 3-Clause License
+Project-URL: Repository, https://github.com/havok2063/boolean_parser
+Project-URL: Documentation, https://boolean-parser.readthedocs.org
+Keywords: software,parsing,sqlalchemy
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Topic :: Documentation :: Sphinx
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: six (>=1.16.0)
+Requires-Dist: pyparsing (>=2.4)
+Requires-Dist: sqlalchemy (>=1.4.0)
+Provides-Extra: dev
+Requires-Dist: pytest (>=5.4) ; extra == 'dev'
+Requires-Dist: pytest-cov (>=2.4.0) ; extra == 'dev'
+Requires-Dist: pytest-sugar (>=0.8.0) ; extra == 'dev'
+Requires-Dist: ipython (>=7.13.0) ; extra == 'dev'
+Requires-Dist: factory-boy (>=2.12.0) ; extra == 'dev'
+Requires-Dist: pytest-factoryboy (>=2.0.3) ; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: Sphinx (>=1.8.0) ; extra == 'docs'
+Requires-Dist: sphinx-bootstrap-theme (>=0.4.12) ; extra == 'docs'
+Requires-Dist: sphinx-issues (>=1.2.0) ; extra == 'docs'
+Requires-Dist: Jinja2 (<3.1) ; extra == 'docs'
+
+# boolean_parser
+
+[![Build Status](https://travis-ci.com/havok2063/boolean_parser.svg?branch=master)](https://travis-ci.com/havok2063/boolean_parser)
+[![Documentation Status](https://readthedocs.org/projects/boolean-parser/badge/?version=latest)](https://boolean-parser.readthedocs.io/en/latest/?badge=latest)
+![Python application](https://github.com/havok2063/boolean_parser/workflows/Python%20application/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/havok2063/boolean_parser/badge.svg?branch=master)](https://coveralls.io/github/havok2063/boolean_parser?branch=master)
+[![codecov](https://codecov.io/gh/havok2063/boolean_parser/branch/master/graph/badge.svg)](https://codecov.io/gh/havok2063/boolean_parser)
+
+
+Python package for parsing a string with conditional expressions joined with boolean logic.  Uses the [pyparsing](https://github.com/pyparsing/pyparsing) package to construct grammatical clauses representing conditional expression, e.g. "x > 1 and y < 2".  String conditional expressions can then be parsed into object representation to be handled downstream.  Can
+convert string boolean expressions into SQLAlchemy filter conditions.
+
+Documentation: https://boolean-parser.readthedocs.io/en/latest/
+
+Parsers:
+ - Parser: core parser for handling parsing complex boolean conditional expressions
+ - SQLParser: parser that enables converting a string conditional into a SQLAlchemy filter clause
+
+
