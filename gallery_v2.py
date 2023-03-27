@@ -48,6 +48,7 @@ class FilterAgentConfigs:
 class Backend():
     def __init__(self):
         self.db = SqliteDatabase("anno_class.db")
+        self.CreateTables()
         self.pe = PluginEngine()
         self.pe.reload_plugins()
 
@@ -196,7 +197,6 @@ class Backend():
 
 
 backend = Backend()
-backend.CreateTables()
 
 
 def load_images_to_db():
@@ -287,16 +287,18 @@ class Main:
 
     collectionSelectedKey = 'collection_key'
 
-    # load_images_to_db()
-
     collections = backend.GetCollections()
     collection = None
     prev_collection = None
     images = backend.ImagesFromDb(collection)
     num_files = len(images)
 
-    filename = images[0]  # name of first file in list
-    image_elem = sg.Image(data=get_img_data(filename, first=True))
+    filename = ""
+    image_elem = sg.Image()
+    if num_files > 0:
+        filename = images[0]
+        image_elem = sg.Image(data=get_img_data(filename, first=True))
+
     filename_display_elem = sg.Text(filename, size=(80, 3))
     file_num_display_elem = sg.Text(
         'File 1 of {}'.format(num_files), size=(15, 1))
@@ -307,10 +309,10 @@ class Main:
     collections_list = sg.Listbox(values=collections, select_mode=sg.LISTBOX_SELECT_MODE_BROWSE, size=(
         20, 30), key=collectionSelectedKey, enable_events=True)
     # define layout, show and read the form
-    col_collections = [[sg.Text('Collections', size=(8, 1)), sg.Button('Save as', size=(8, 1), key='save_as_btn')],
+    col_collections = [[sg.Text('Collections', size=(10, 1)), sg.Button('Save as', size=(8, 1), key='save_as_btn')],
                        [collections_list],
                        [sg.Button('Annotate', size=(8, 2)),
-                        sg.Button('Filter/Classify', size=(8, 2))],
+                        sg.Button('Filter/Classify', size=(10, 2))],
                        [sg.Button("Load agents", size=(16, 2))],
                        [sg.Button("Modify collection", size=(8, 2)), sg.Button("Delete collection", size=(8, 2))]]
 

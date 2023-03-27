@@ -12,7 +12,7 @@ class PluginRunTimeOption(object):
 
 class BaseModel(Model):
     class Meta:
-        database = SqliteDatabase("test.db")
+        database = SqliteDatabase("anno_class.db")
 
 
 class Image(BaseModel):
