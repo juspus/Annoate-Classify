@@ -47,7 +47,7 @@ class FilterAgentConfigs:
 
 class Backend():
     def __init__(self):
-        self.db = SqliteDatabase("test.db")
+        self.db = SqliteDatabase("anno_class.db")
         self.pe = PluginEngine()
         self.pe.reload_plugins()
 
