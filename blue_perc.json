@@ -1,0 +1,13 @@
+[
+    {
+        "name": "test-filter-agent",
+        "configs": [
+            {
+                "id": null,
+                "name": null,
+                "value": "blue_perc>0.5",
+                "valType": "string"
+            }
+        ]
+    }
+]

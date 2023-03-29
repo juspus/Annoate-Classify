@@ -16,6 +16,9 @@ variables:
   - name: "avg_blue"
     vtype: "double"
 
+required-agents:
+  - alias: "agent-alias"
+
 requirements:
   - name: "numpy"
     version: "1.24.2"
