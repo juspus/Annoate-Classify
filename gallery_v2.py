@@ -326,8 +326,8 @@ class Main:
     layout = [[sg.Column(col_collections),
                sg.Column(col_files), sg.Column(col)]]
 
-    window = sg.Window('Image Browser', layout, return_keyboard_events=True,
-                       location=(0, 0), use_default_focus=False)
+    window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
+                       location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
 
     def openCollectionCreateWindow(self, images):
         col_layout = [[sg.Text("Name: "), sg.InputText(key="name_field")],
