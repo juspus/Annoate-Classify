@@ -1,0 +1,19 @@
+{
+  "images": [
+    "C:\\Users\\JustasPuodzius\\Downloads\\333264225_971731767535682_3418103304218157742_n.jpg",
+    "C:\\Users\\JustasPuodzius\\Pictures\\vafliagandrisLogo.png"
+  ],
+  "classifiers": [
+    {
+      "name": "test-filter-agent",
+      "configs": [
+        {
+          "id": null,
+          "name": null,
+          "value": "blue_perc>0.5",
+          "valType": "string"
+        }
+      ]
+    }
+  ]
+}

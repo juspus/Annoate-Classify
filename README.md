@@ -65,3 +65,6 @@ First, images should be added to the database by using `open folder` button whic
 `Annotate` - annotates selected images or all images if none are selected by selected agents.
 
 `Filter/Classify` - see installed filters. By clicking `Upload filter config` you can select json with desired filter configuration as seen in `blue_perc.json` example filter configuration.
+
+### Using command lines
+It is possible to use this tool with command lines providing it with configuration json.

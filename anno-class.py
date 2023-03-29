@@ -171,20 +171,23 @@ class Backend():
 
             print(filt)
 
-            filter_config = []
-
-            for con in filt:
-                config = FilterAgentConfigs(**con)
-                recreated = []
-                for c in config.configs:
-                    recreated.append(dict_to_model(FilterConfigAct, c))
-
-                filter_config.append(
-                    FilterAgentConfigs(config.name, recreated))
-
-            return filter_config
+            return self.ParseJsonForFilter(filt)
         # except:
         #     sg.Popup("File not selected or invalid.")
+
+    def ParseJsonForFilter(self, json):
+        filter_config = []
+
+        for con in json:
+            config = FilterAgentConfigs(**con)
+            recreated = []
+            for c in config.configs:
+                recreated.append(dict_to_model(FilterConfigAct, c))
+
+            filter_config.append(
+                FilterAgentConfigs(config.name, recreated))
+
+        return filter_config
 
     def DeleteCollection(self, name):
         col = Collection.get(Collection.name == name)
@@ -557,8 +560,14 @@ elif config["classify"]:
     content = f.read()
 
     contentJson = json.loads(content)
-    filteredImages = backend.StartFilter(
-        contentJson["images"], contentJson["classifiers"])
+    ims = []
+    for img in contentJson["images"]:
+        im = Image()
+        im.Path = img
+        ims.append(im)
+    filters = backend.ParseJsonForFilter(contentJson["classifiers"])
+
+    filteredImages = backend.StartFilter(ims, filters)
     if config["export"]:
         out = config["out"]
         fw = open(out, "w")
