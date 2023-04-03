@@ -13,8 +13,6 @@ class FileSystem:
     def __get_base_dir():
         """At most all application packages are just one level deep"""
         current_path = os.path.abspath(os.path.dirname(__file__))
-        current_path = os.path.split(current_path)[0]
-        current_path = os.path.split(current_path)[0]
         return os.path.join(current_path, '..')
 
     @staticmethod
