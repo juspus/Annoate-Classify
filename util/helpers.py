@@ -13,6 +13,8 @@ class FileSystem:
     def __get_base_dir():
         """At most all application packages are just one level deep"""
         current_path = os.path.abspath(os.path.dirname(__file__))
+        current_path = os.path.split(current_path)[0]
+        current_path = os.path.split(current_path)[0]
         return os.path.join(current_path, '..')
 
     @staticmethod
@@ -23,7 +25,7 @@ class FileSystem:
     @staticmethod
     def get_plugins_directory() -> str:
         base_dir = FileSystem.__get_base_dir()
-        return os.path.join(base_dir, 'plugins')
+        return os.path.join(base_dir, 'Plugins')
 
     @staticmethod
     def load_configuration(name: str = 'configuration.yaml', config_directory: Optional[str] = None) -> dict:

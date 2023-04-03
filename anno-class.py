@@ -15,21 +15,9 @@ from engine import PluginEngine
 from model import Image, AnnotationAct, AnnotationAgent
 from model.models import FilterConfigAct, ImageAnoCombo, FilterInstance, FilterAgent, Collection, ImageInCollection
 import json
+from tendo import singleton
 
-"""
-Simple Image Browser based on PySimpleGUI
---------------------------------------------
-There are some improvements compared to the PNG browser of the repository:
-1. Paging is cyclic, i.e. automatically wraps around if file index is outside
-2. Supports all file types that are valid PIL images
-3. Limits the maximum form size to the physical screen
-4. When selecting an image from the listbox, subsequent paging uses its index
-5. Paging performance improved significantly because of using PIL
-Dependecies
-------------
-Python3
-PIL
-"""
+me = singleton.SingleInstance()  # will sys.exit(-1) if other instance is running
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
