@@ -34,14 +34,18 @@ class PluginUseCase:
                     if FilterAgent.select().where(FilterAgent.alias == config.alias).count() == 0:
                         fa = FilterAgent.create(name=config.name, alias=config.alias, creator=config.creator,
                                                 repository=config.repository, description=config.description, version=config.version)
+
                         for reqAgent in config.required_agents:
-                            aa = AnnotationAgent.get(
+                            aas = AnnotationAgent.select().where(
                                 AnnotationAgent.alias == reqAgent)
-                            if aa is None:
+                            if aas.count() == 0:
+                                FilterAgent.delete_by_id(fa.id)
                                 raise Exception(
                                     f'Make sure annotation agents {config.required_agents} are installed.')
+                            aa = aas[0]
                             FilterAgentRequiredAnnotationAgent.create(
                                 filter_agent=fa, annotation_agent=aa)
+
                     self.filter_modules.append(latest_module)
             IPluginRegistry.plugin_registries.clear()
 

@@ -38,6 +38,9 @@ class Backend():
         self.db = SqliteDatabase("anno_class.db")
         self.CreateTables()
         self.pe = PluginEngine()
+        self.ReloadAgents()
+
+    def ReloadAgents(self):
         try:
             self.pe.reload_plugins()
         except Exception as e:
@@ -318,7 +321,7 @@ class Main:
     col_collections = [[sg.Text('Collections', size=(10, 1)), sg.Button('Save as', size=(8, 1), key='save_as_btn')],
                        [collections_list],
                        [sg.Button('Annotate', size=(8, 2)),
-                        sg.Button('Filter/Classify', size=(10, 2))],
+                       sg.Button('Filter/Classify', size=(10, 2))],
                        [sg.Button("Load agents", size=(16, 2))],
                        [sg.Button("Modify collection", size=(8, 2)), sg.Button("Delete collection", size=(8, 2))]]
 
@@ -491,8 +494,11 @@ class Main:
                 backend.DeleteSelectedImagesInCollection(self.collection,
                                                          self.GetSelectedImages(values))
                 self.UpdateImagesList(values)
+            elif event == "Load agents":
+                backend.ReloadAgents()
             else:
-                self.filename = self.images[self.i]
+                if len(self.images) > 0:
+                    self.filename = self.images[self.i]
 
             # update window with new image
             try:
