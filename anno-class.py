@@ -13,7 +13,7 @@ from playhouse.shortcuts import model_to_dict, dict_to_model
 from peewee import *
 from engine import PluginEngine
 from model import Image, AnnotationAct, AnnotationAgent
-from model.models import FilterConfigAct, ImageAnoCombo, FilterInstance, FilterAgent, Collection, ImageInCollection
+from model.models import FilterAgentRequiredAnnotationAgent, FilterConfigAct, ImageAnoCombo, FilterInstance, FilterAgent, Collection, ImageInCollection
 import json
 from tendo import singleton
 
@@ -38,12 +38,15 @@ class Backend():
         self.db = SqliteDatabase("anno_class.db")
         self.CreateTables()
         self.pe = PluginEngine()
-        self.pe.reload_plugins()
+        try:
+            self.pe.reload_plugins()
+        except Exception as e:
+            sg.PopupError(e)
 
     def CreateTables(self):
         self.db.connect()
         self.db.create_tables([Image, AnnotationAct, AnnotationAgent,
-                               FilterAgent, FilterConfigAct, FilterInstance, Collection, ImageInCollection])
+                               FilterAgent, FilterConfigAct, FilterInstance, Collection, ImageInCollection, FilterAgentRequiredAnnotationAgent])
 
     def FillImages(self, images):
         for i in images:
@@ -144,6 +147,9 @@ class Backend():
         js = json.dumps(filters, indent=4)
         fileName = sg.PopupGetFile(
             message="Template location:", default_extension="*.json")
+        if fileName == None:
+            return None
+
         with open(fileName, "w") as outfile:
             outfile.write(js)
 
@@ -153,6 +159,9 @@ class Backend():
 
         fileName = sg.PopupGetFile(
             message="Filters configuration file:", default_extension="*.json")
+
+        if fileName == None:
+            return None
         # try:
         with open(fileName, "r") as infile:
             filt = json.load(infile)
@@ -262,6 +271,12 @@ class FilterWin:
             elif self.event == self.uploadFilter_key:
                 self.filter = backend.LoadFilterConfigFromJson()
             elif self.event == self.applyFilter_key:
+                if self.images == None:
+                    sg.Popup("No images loaded")
+                    break
+                if self.filter == None:
+                    sg.Popup("No filter selected, upload json configuration")
+                    break
                 self.filtered_images = backend.StartFilter(
                     self.images, self.filter)
                 for i in self.filtered_images:

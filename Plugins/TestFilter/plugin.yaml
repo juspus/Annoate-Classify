@@ -12,6 +12,10 @@ configurations:
   - name: "evaluation"
     vtype: "string"
 
+required_agents: 
+  - "color-percent-agent"
+  - "grayscale-agent"
+
 requirements:
   - name: "boolean-parser"
     version: "0.1.3"

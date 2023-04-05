@@ -5,7 +5,7 @@ from typing import List, Any, Dict
 from engine import IPluginRegistry, AnnotationPluginCore
 from engine.engine_contract import FilterPluginCore
 from model import PluginConfig, AnnotationAgent
-from model.models import FilterAgent
+from model.models import FilterAgent, FilterAgentRequiredAnnotationAgent
 from .utilities import PluginUtility
 
 
@@ -32,8 +32,16 @@ class PluginUseCase:
                     self.annotation_modules.append(latest_module)
                 else:
                     if FilterAgent.select().where(FilterAgent.alias == config.alias).count() == 0:
-                        FilterAgent.create(name=config.name, alias=config.alias, creator=config.creator,
-                                           repository=config.repository, description=config.description, version=config.version)
+                        fa = FilterAgent.create(name=config.name, alias=config.alias, creator=config.creator,
+                                                repository=config.repository, description=config.description, version=config.version)
+                        for reqAgent in config.required_agents:
+                            aa = AnnotationAgent.get(
+                                AnnotationAgent.alias == reqAgent)
+                            if aa is None:
+                                raise Exception(
+                                    f'Make sure annotation agents {config.required_agents} are installed.')
+                            FilterAgentRequiredAnnotationAgent.create(
+                                filter_agent=fa, annotation_agent=aa)
                     self.filter_modules.append(latest_module)
             IPluginRegistry.plugin_registries.clear()
 

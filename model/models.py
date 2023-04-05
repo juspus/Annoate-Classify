@@ -50,6 +50,7 @@ class PluginConfig:
     description: str
     version: str
     requirements: Optional[List[DependencyModule]]
+    required_agents: Optional[List[str]]
     annotation_agent: bool
 
 
@@ -110,8 +111,13 @@ class FilterAgent(BaseModel):
     repository = TextField()
     description = TextField()
     version = TextField()
-    # requiredAnotationAgents = ForeignKeyField(
-    #     AnnotationAgent, backref="annotation_agents")
+
+
+class FilterAgentRequiredAnnotationAgent(BaseModel):
+    filter_agent = ForeignKeyField(
+        FilterAgent, backref="required_annotation_agents")
+    annotation_agent = ForeignKeyField(
+        AnnotationAgent, backref="required_by_filter_agents")
 
 
 class FilterConfigAct(BaseModel):
