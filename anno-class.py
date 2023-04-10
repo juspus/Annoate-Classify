@@ -51,12 +51,15 @@ class Backend():
         self.db.create_tables([Image, AnnotationAct, AnnotationAgent,
                                FilterAgent, FilterConfigAct, FilterInstance, Collection, ImageInCollection, FilterAgentRequiredAnnotationAgent])
 
-    def FillImages(self, images):
+    def FillImages(self, images, folderName):
         for i in images:
             try:
                 Image.create(Path=i)
             except:
                 continue
+
+        self.SaveImageListAsCollection(
+            f"{folderName}", "Loaded images.", Image.select())
 
     def LoadAnnotations(self, images, annotations):
         self.plugins = annotations
@@ -97,7 +100,9 @@ class Backend():
             imInCol.delete_instance()
 
     def SaveImageListAsCollection(self, name, description, images):
-        col = Collection.create(name=name, description=description)
+        col = Collection.select().where(Collection.name == name)
+        if (col == None):
+            col = Collection.create(name=name, description=description)
         for i in images:
             ImageInCollection.create(collection=col, image=i)
 
@@ -216,7 +221,8 @@ def load_images_to_db():
         # create sub list of image files (no sub folders, no wrong file types)
         fnames = [os.path.join(folder, f) for f in flist0 if os.path.isfile(
             os.path.join(folder, f)) and f.lower().endswith(img_types)]
-        backend.FillImages(fnames)
+
+        backend.FillImages(fnames, folder)
 
         num_files = len(backend.ImagesFromDb(None))
         if num_files == 0:
@@ -381,13 +387,18 @@ class Main:
         col_window.close()
 
     def openAnnotationWindow(self, images):
+
+        annotations_progress = sg.ProgressBar(100, orientation='h', size=(
+            20, 1), key='annotations_progress', visible=False)
+
         annotations_list = sg.Listbox(values=[a.alias for a in AnnotationAgent.select()], change_submits=True,
                                       size=(60, 30), key='annotations_list', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED, enable_events=True)
 
         apply_button = sg.Button("Apply", size=(8, 2))
 
         layout = [[annotations_list],
-                  [apply_button]]
+                  [apply_button],
+                  [annotations_progress]]
 
         window = sg.Window("Apply annotations", layout=layout, location=(0, 0))
 
@@ -464,6 +475,7 @@ class Main:
                 load_images_to_db()
                 self.images = backend.ImagesFromDb(self.collection)
                 self.imagesList.update(self.images)
+                self.collections_list.update(backend.GetCollections())
                 self.filename = self.images[0]
                 self.i = 0
             elif event == 'save_as_btn':
