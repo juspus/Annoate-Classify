@@ -231,7 +231,7 @@ def load_images_to_db():
 # ------------------------------------------------------------------------------
 
 
-def get_img_data(f, maxsize=(1200, 850), first=False):
+def get_img_data(f, maxsize=(800, 620), first=False):
     """Generate image data using PIL
     """
     img = PILIM.open(f)
@@ -303,14 +303,13 @@ class Main:
     num_files = len(images)
 
     filename = ""
-    image_elem = sg.Image()
+    image_elem = sg.Image(size=(800, 600))
     if num_files > 0:
         filename = images[0]
-        image_elem = sg.Image(data=get_img_data(filename, first=True))
+        image_elem = sg.Image(data=get_img_data(
+            filename, first=True), size=(800, 620))
 
     filename_display_elem = sg.Text(filename, size=(80, 3))
-    file_num_display_elem = sg.Text(
-        'File 1 of {}'.format(num_files), size=(15, 1))
 
     imagesList = sg.Listbox(values=images, change_submits=True,
                             size=(60, 30), key='listbox_images', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED)
@@ -318,22 +317,21 @@ class Main:
     collections_list = sg.Listbox(values=collections, select_mode=sg.LISTBOX_SELECT_MODE_BROWSE, size=(
         20, 30), key=collectionSelectedKey, enable_events=True)
     # define layout, show and read the form
-    col_collections = [[sg.Text('Collections', size=(10, 1)), sg.Button('Save as', size=(8, 1), key='save_as_btn')],
+    col_collections = [[sg.Button('Open folder', size=(16, 1), key='open_folder_btn', enable_events=True)],
+                       [sg.Text('Collections', size=(10, 1))],
                        [collections_list],
-                       [sg.Button('Annotate', size=(8, 2)),
-                       sg.Button('Filter/Classify', size=(10, 2))],
-                       [sg.Button("Load agents", size=(16, 2))],
-                       [sg.Button("Modify collection", size=(8, 2)), sg.Button("Delete collection", size=(8, 2))]]
+                       [sg.Button("Modify collection", size=(8, 2)),
+                        sg.Button("Delete collection", size=(8, 2))]]
 
-    col = [[sg.Button("Delete", size=(8, 2)), filename_display_elem],
-           [image_elem]]
+    col = [[image_elem]]
 
-    col_files = [[sg.Button('Open folder', size=(16, 1), key='open_folder_btn', enable_events=True), sg.Button('Clear selection', size=(16, 1), key='clear_selection_btn', enable_events=True)],
+    col_files = [[sg.Button('Save as', size=(8, 2), key='save_as_btn'), sg.Button('Clear selection (select all)', size=(20, 2), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 2)), filename_display_elem],
                  [imagesList],
-                 [sg.Button('Next', size=(8, 2)), sg.Button('Prev', size=(8, 2)), file_num_display_elem]]
+                 [sg.Button('Annotate', size=(8, 2)),
+                  sg.Button('Filter/Classify', size=(10, 2))]]
 
-    layout = [[sg.Column(col_collections),
-               sg.Column(col_files), sg.Column(col)]]
+    layout = [[sg.Column(col_collections, size=(200, 620)),
+               sg.Column(col_files, size=(400, 620)), sg.Column(col, size=(800, 620))]]
 
     window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
@@ -446,16 +444,6 @@ class Main:
             # perform button and keyboard operations
             if event == sg.WIN_CLOSED:
                 break
-            elif event in ('Next', 'MouseWheel:Down', 'Down:40', 'Next:34'):
-                self.i += 1
-                if self.i >= self.num_files:
-                    self.i -= self.num_files
-                self.filename = self.images[self.i]
-            elif event in ('Prev', 'MouseWheel:Up', 'Up:38', 'Prior:33'):
-                self.i -= 1
-                if self.i < 0:
-                    self.i = self.num_files + self.i
-                self.filename = self.images[self.i]
             elif event == 'listbox_images':            # something from the listbox
                 if len(values["listbox_images"]) > 0:
                     # selected filename
@@ -485,9 +473,15 @@ class Main:
             elif event == self.collectionSelectedKey:
                 self.UpdateImagesList(values)
             elif event == "Delete collection":
+                if len(values[self.collectionSelectedKey]) == 0:
+                    sg.popup("Select a collection first.", title="Error")
+                    continue
                 backend.DeleteCollection(values[self.collectionSelectedKey][0])
                 self.UpdateCollections()
             elif event == "Modify collection":
+                if self.collection == None:
+                    sg.popup("Select a collection first.", title="Error")
+                    continue
                 self.openCollectionModifyWindow(self.collection)
                 self.UpdateCollections()
             elif event == "Delete":
@@ -507,8 +501,6 @@ class Main:
                 # update window with filename
                 self.filename_display_elem.update(self.filename)
                 # update page display
-                self.file_num_display_elem.update(
-                    'File {} of {}'.format(self.i+1, self.num_files))
             except:
                 sg.popup("Image is missing or unavailable.", title="Error")
 
