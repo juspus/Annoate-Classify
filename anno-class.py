@@ -61,10 +61,13 @@ class Backend():
         self.SaveImageListAsCollection(
             f"{folderName}", "Loaded images.", Image.select())
 
-    def LoadAnnotations(self, images, annotations):
+    def LoadAnnotations(self, images, annotations,  annotations_progress=None):
         self.plugins = annotations
         if len(self.plugins) == 0:
             self.plugins = [a.alias for a in AnnotationAgent.select()]
+        count = 0
+        if annotations_progress != None:
+            annotations_progress.update(count, len(images), visible=True)
         for im in images:
             imPath = im
             if type(im) is Image:
@@ -73,6 +76,13 @@ class Backend():
             self.pe.start_annotations(imPath, self.plugins)
             for a in AnnotationAct.select().where(AnnotationAct.image == imPath):
                 print(a.name, a.value)
+
+            count += 1
+            if annotations_progress != None:
+                annotations_progress.update(count, len(images), visible=True)
+
+        if annotations_progress != None:
+            sg.Popup("Annotation complete.")
 
     def ImagesFromDb(self, collection_name=None):
         if (collection_name == None):
@@ -387,10 +397,8 @@ class Main:
         col_window.close()
 
     def openAnnotationWindow(self, images):
-
-        annotations_progress = sg.ProgressBar(100, orientation='h', size=(
-            20, 1), key='annotations_progress', visible=False)
-
+        annotations_progress = sg.ProgressBar(0, orientation='h', size=(20, 20),
+                                              key='annotations_progress', visible=False)
         annotations_list = sg.Listbox(values=[a.alias for a in AnnotationAgent.select()], change_submits=True,
                                       size=(60, 30), key='annotations_list', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED, enable_events=True)
 
@@ -407,7 +415,8 @@ class Main:
             if event == sg.WIN_CLOSED:
                 break
             elif event == "Apply":
-                backend.LoadAnnotations(images, values["annotations_list"])
+                backend.LoadAnnotations(
+                    images, values["annotations_list"], annotations_progress)
                 break
         window.close()
 
