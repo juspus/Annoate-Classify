@@ -61,7 +61,7 @@ class Backend():
         self.SaveImageListAsCollection(
             f"{folderName}", "Loaded images.", Image.select())
 
-    def LoadAnnotations(self, images, annotations,  annotations_progress=None):
+    def LoadAnnotations(self, images, annotations, override=False, annotations_progress=None):
         self.plugins = annotations
         if len(self.plugins) == 0:
             self.plugins = [a.alias for a in AnnotationAgent.select()]
@@ -73,7 +73,7 @@ class Backend():
             if type(im) is Image:
                 imPath = im.Path
 
-            self.pe.start_annotations(imPath, self.plugins)
+            self.pe.start_annotations(imPath, self.plugins, override=override)
             for a in AnnotationAct.select().where(AnnotationAct.image == imPath):
                 print(a.name, a.value)
 
@@ -404,8 +404,10 @@ class Main:
 
         apply_button = sg.Button("Apply", size=(8, 2))
 
+        override_checkbox = sg.Checkbox("Re-annotate", key="override_checkbox")
+
         layout = [[annotations_list],
-                  [apply_button],
+                  [apply_button, override_checkbox],
                   [annotations_progress]]
 
         window = sg.Window("Apply annotations", layout=layout, location=(0, 0))
@@ -416,7 +418,7 @@ class Main:
                 break
             elif event == "Apply":
                 backend.LoadAnnotations(
-                    images, values["annotations_list"], annotations_progress)
+                    images, values["annotations_list"], override=values["override_checkbox"], annotations_progress=annotations_progress)
                 break
         window.close()
 

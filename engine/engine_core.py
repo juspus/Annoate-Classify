@@ -10,10 +10,10 @@ class PluginEngine:
         self.use_case = PluginUseCase()
         print("sd")
 
-    def start_annotations(self, image: str, plugins: list[str]) -> None:
+    def start_annotations(self, image: str, plugins: list[str], override=False) -> None:
         self.used_plugins_annotation = plugins
         print("Annotating ", image)
-        self.__invoke_on_annotation_plugins(image)
+        self.__invoke_on_annotation_plugins(image, override=override)
 
     def reload_plugins(self) -> None:
         self.__reload_plugins()
@@ -29,17 +29,20 @@ class PluginEngine:
         """
         self.use_case.discover_plugins(True)
 
-    def __invoke_on_annotation_plugins(self, image):
+    def __invoke_on_annotation_plugins(self, image, override=False):
         """Apply all of the plugins on the argument supplied to this function
         """
         for module in self.use_case.annotation_modules:
             plugin = self.use_case.register_plugin_annotation(module)
 
             if plugin.meta.name in self.used_plugins_annotation:
-                if self.__is_annotated_by_plugin(image, plugin):
+                if self.__is_annotated_by_plugin(image, plugin) & override == False:
                     continue
                 delegate = self.use_case.hook_plugin_annotation(plugin)
                 analysis = delegate(image)
+                if override:
+                    AnnotationAct.delete().where((AnnotationAct.agent == plugin.meta.name)
+                                                 & (AnnotationAct.image == image)).execute()
                 for a in analysis:
                     a.agent = plugin.meta.name
                     a.image = image
