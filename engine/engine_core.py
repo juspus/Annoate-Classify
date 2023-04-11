@@ -36,7 +36,7 @@ class PluginEngine:
             plugin = self.use_case.register_plugin_annotation(module)
 
             if plugin.meta.name in self.used_plugins_annotation:
-                if self.__is_annotated_by_plugin(image, plugin) & override == False:
+                if self.__is_annotated_by_plugin(image, plugin) and override == False:
                     continue
                 delegate = self.use_case.hook_plugin_annotation(plugin)
                 analysis = delegate(image)
