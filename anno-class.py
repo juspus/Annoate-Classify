@@ -52,14 +52,14 @@ class Backend():
                                FilterAgent, FilterConfigAct, FilterInstance, Collection, ImageInCollection, FilterAgentRequiredAnnotationAgent])
 
     def FillImages(self, images, folderName):
+        foundImages = []
+        im = None
         for i in images:
-            try:
-                Image.create(Path=i)
-            except:
-                continue
+            im, created = Image.get_or_create(Path=i)
+            foundImages.append(im)
 
         self.SaveImageListAsCollection(
-            f"{folderName}", "Loaded images.", Image.select())
+            f"{folderName}", "Loaded images.", foundImages)
 
     def LoadAnnotations(self, images, annotations, override=False, annotations_progress=None):
         self.plugins = annotations
@@ -110,9 +110,11 @@ class Backend():
             imInCol.delete_instance()
 
     def SaveImageListAsCollection(self, name, description, images):
-        col = Collection.select().where(Collection.name == name)
-        if (col == None):
-            col = Collection.create(name=name, description=description)
+        col, created = Collection.get_or_create(
+            name=name, description=description)
+        col.deletedAt = None
+        col.modifiedAt = datetime.datetime.now()
+        col.save()
         for i in images:
             ImageInCollection.create(collection=col, image=i)
 
@@ -207,6 +209,8 @@ class Backend():
     def DeleteCollection(self, name):
         col = Collection.get(Collection.name == name)
         col.deletedAt = datetime.datetime.now()
+        ImageInCollection.delete().where(
+            ImageInCollection.collection == col).execute()
         col.save()
         print(col.name, col.deletedAt)
 
