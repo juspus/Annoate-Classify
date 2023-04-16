@@ -6,6 +6,7 @@ from engine import IPluginRegistry, AnnotationPluginCore
 from engine.engine_contract import FilterPluginCore
 from model import PluginConfig, AnnotationAgent
 from model.models import FilterAgent, FilterAgentRequiredAnnotationAgent
+from PySimpleGUI import PySimpleGUI as sg
 from .utilities import PluginUtility
 
 
@@ -40,8 +41,9 @@ class PluginUseCase:
                                 AnnotationAgent.alias == reqAgent)
                             if aas.count() == 0:
                                 FilterAgent.delete_by_id(fa.id)
-                                raise Exception(
-                                    f'Make sure annotation agents {config.required_agents} are installed.')
+                                sg.PopupOK(
+                                    f'Make sure annotation agents {config.required_agents} are installed. Restart may be needed.')
+                                continue
                             aa = aas[0]
                             FilterAgentRequiredAnnotationAgent.create(
                                 filter_agent=fa, annotation_agent=aa)
