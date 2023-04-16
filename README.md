@@ -4,6 +4,7 @@ A tool for combining multiple image processing and classification method and alg
 ## Setup
 ### Prerequisites:
 - Python 3.10
+- (Linux) Python Tk
 ### Install:
 1. Download the source code
     - As zip and unzip
