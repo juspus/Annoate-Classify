@@ -2,6 +2,7 @@
 from model.models import FilterConfigAct, ImageAnoCombo
 from usecase import PluginUseCase
 from model import Image, AnnotationAct
+from PySimpleGUI import PySimpleGUI as sg
 
 
 class PluginEngine:
@@ -69,7 +70,13 @@ class PluginEngine:
             0]][0]
 
         delegate = self.use_case.hook_plugin_filter(plugin)
-        filtered = delegate(images, self.used_plugins_filter[0].configs)
+        try:
+            filtered = delegate(images, self.used_plugins_filter[0].configs)
+        except:
+            sg.PopupError("Error in plugin " + plugin.meta.name +
+                          ". Please check the plugin's documentation and make sure all required annotations are present.")
+            return
+
         self.used_plugins_filter.pop(0)
 
         separated_values = {}
