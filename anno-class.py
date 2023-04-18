@@ -106,11 +106,18 @@ class Backend():
 
     def DeleteSelectedImagesInCollection(self, collection, images):
         dbImages = self.GetSelectedImagesInDb(images)
+        if collection == None:
+            return
+        ans = sg.PopupYesNo(
+            "Do want to delete the selected images from the database aswell?")
         col = Collection.get(Collection.name == collection)
         for i in dbImages:
             imInCol = ImageInCollection.get(
                 ImageInCollection.collection == col, ImageInCollection.image == i)
             imInCol.delete_instance()
+        if ans == "Yes":
+            for i in dbImages:
+                i.delete_instance()
 
     def SaveImageListAsCollection(self, name, description, images):
         col, created = Collection.get_or_create(
@@ -339,13 +346,13 @@ class Main:
         image_elem = sg.Image(data=get_img_data(
             filename, first=True), size=(800, 620))
 
-    filename_display_elem = sg.Text(filename, size=(80, 3))
+    filename_display_elem = sg.Text(filename, size=(80, 1))
 
-    imagesList = sg.Listbox(values=images, change_submits=True,
-                            size=(60, 30), key='listbox_images', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED)
+    imagesList = sg.Listbox(values=images, enable_events=True,
+                            size=(60, 40), key='listbox_images', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED, expand_y=True)
 
     collections_list = sg.Listbox(values=collections, select_mode=sg.LISTBOX_SELECT_MODE_BROWSE, size=(
-        20, 30), key=collectionSelectedKey, enable_events=True)
+        20, 40), key=collectionSelectedKey, enable_events=True, expand_y=True)
     # define layout, show and read the form
     col_collections = [[sg.Button('Open folder', size=(16, 1), key='open_folder_btn', enable_events=True)],
                        [sg.Text('Collections', size=(10, 1))],
@@ -357,14 +364,14 @@ class Main:
                                       "Annotation", "Value"], auto_size_columns=False, col_widths=200, num_rows=10, key='imagesAnnotationsTable', enable_events=True, max_col_width=200, expand_x=True)
     col = [[image_elem], [imagesAnnotationsTable]]
 
-    col_files = [[sg.Button('Save as', size=(8, 1), key='save_as_btn'), sg.Button('Clear selection (select all)', size=(20, 1), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 1)), filename_display_elem],
+    col_files = [[sg.Button('Save as', size=(8, 1), key='save_as_btn', enable_events=True), sg.Button('Clear selection (select all)', size=(20, 1), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 1), enable_events=True), filename_display_elem],
                  [sg.Text('Images', size=(10, 1))],
                  [imagesList],
                  [sg.Button('Annotate', size=(8, 2)),
                  sg.Button('Filter/Classify', size=(10, 2))]]
 
     layout = [[sg.Column(col_collections, size=(200, 820)),
-               sg.Column(col_files, size=(400, 845)), sg.Column(col, size=(800, 820))]]
+               sg.Column(col_files, size=(400, 820)), sg.Column(col, size=(800, 820))]]
 
     window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
@@ -504,7 +511,8 @@ class Main:
                 self.images = backend.ImagesFromDb(self.collection)
                 self.imagesList.update(self.images)
                 self.collections_list.update(backend.GetCollections())
-                self.filename = self.images[0]
+                if len(self.images) > 0:
+                    self.filename = self.images[0]
                 self.i = 0
             elif event == 'save_as_btn':
                 self.openCollectionCreateWindow(
