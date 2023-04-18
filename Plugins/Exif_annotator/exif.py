@@ -41,7 +41,7 @@ class TestAgent(AnnotationPluginCore):
             data = exifdata.get(tag_id)
             # decode bytes
             if isinstance(data, bytes):
-                data = data.decode()
+                data = data.decode(errors="ignore")
             info_dict["exif_"+tag] = data
 
         for key, value in info_dict.items():

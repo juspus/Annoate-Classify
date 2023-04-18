@@ -54,6 +54,9 @@ class Backend():
     def FillImages(self, images, folderName):
         foundImages = []
         im = None
+        if images == None:
+            sg.PopupOk("No images found in folder.")
+            return
         for i in images:
             im, created = Image.get_or_create(Path=i)
             foundImages.append(im)
@@ -132,8 +135,7 @@ class Backend():
         im: Image
         for im in images:
 
-            query = AnnotationAct.select().where(
-                AnnotationAct.image == im.Path)
+            query = self.GetImageAnnotations(im)
             combo = ImageAnoCombo(im.Path, list(query))
 
             imAno.append(combo)
@@ -147,6 +149,14 @@ class Backend():
 
         filteredImages = self.pe.start_filters(imAno, filters)
         return filteredImages
+
+    def GetImageAnnotations(self, image):
+        return AnnotationAct.select().where(AnnotationAct.image == image.Path)
+
+    def GetImageAnnotationsForDisplay(self, imPath):
+        image = Image.get(Image.Path == imPath)
+
+        return [[a.name, a.value] for a in self.GetImageAnnotations(image)]
 
     def CreateFilterConfigTemplate(self):
         config = FilterConfigAct()
@@ -343,15 +353,18 @@ class Main:
                        [sg.Button("Modify collection", size=(8, 2)),
                         sg.Button("Delete collection", size=(8, 2))]]
 
-    col = [[image_elem]]
+    imagesAnnotationsTable = sg.Table(values=[['', '']], headings=[
+                                      "Annotation", "Value"], auto_size_columns=False, col_widths=200, num_rows=10, key='imagesAnnotationsTable', enable_events=True, max_col_width=200, expand_x=True)
+    col = [[image_elem], [imagesAnnotationsTable]]
 
-    col_files = [[sg.Button('Save as', size=(8, 2), key='save_as_btn'), sg.Button('Clear selection (select all)', size=(20, 2), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 2)), filename_display_elem],
+    col_files = [[sg.Button('Save as', size=(8, 1), key='save_as_btn'), sg.Button('Clear selection (select all)', size=(20, 1), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 1)), filename_display_elem],
+                 [sg.Text('Images', size=(10, 1))],
                  [imagesList],
                  [sg.Button('Annotate', size=(8, 2)),
-                  sg.Button('Filter/Classify', size=(10, 2))]]
+                 sg.Button('Filter/Classify', size=(10, 2))]]
 
-    layout = [[sg.Column(col_collections, size=(200, 620)),
-               sg.Column(col_files, size=(400, 620)), sg.Column(col, size=(800, 620))]]
+    layout = [[sg.Column(col_collections, size=(200, 820)),
+               sg.Column(col_files, size=(400, 845)), sg.Column(col, size=(800, 820))]]
 
     window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
@@ -527,6 +540,8 @@ class Main:
                     data=get_img_data(self.filename, first=True))
                 # update window with filename
                 self.filename_display_elem.update(self.filename)
+                self.imagesAnnotationsTable.update(
+                    values=backend.GetImageAnnotationsForDisplay(self.filename))
                 # update page display
             except:
                 sg.popup("Image is missing or unavailable.", title="Error")
