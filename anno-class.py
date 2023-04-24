@@ -7,6 +7,7 @@ from PIL import Image as PILIM
 from PIL import ImageTk
 import io
 import uuid
+import shutil
 
 from playhouse.shortcuts import model_to_dict, dict_to_model
 
@@ -134,6 +135,19 @@ class Backend():
         col.name = name
         col.description = description
         col.save()
+
+    def ExportCollection(self, collection, location) -> None:
+        col: Collection
+        col = Collection.get(Collection.name == collection)
+        images = Image.select().join(ImageInCollection).where(
+            ImageInCollection.collection == col.id)
+        for i in images:
+            iPath = i.Path
+            iName = os.path.basename(iPath)
+            iDir = os.path.dirname(iPath)
+            iNewPath = os.path.join(location, iName)
+            print(iPath, iNewPath)
+            shutil.copy2(iPath, iNewPath)
 
     def StartFilter(self, images, filters):
 
@@ -358,7 +372,8 @@ class Main:
                        [sg.Text('Collections', size=(10, 1))],
                        [collections_list],
                        [sg.Button("Modify collection", size=(8, 2)),
-                        sg.Button("Delete collection", size=(8, 2))]]
+                        sg.Button("Delete collection", size=(8, 2))],
+                       [sg.Button("Export collection to folder", size=(16, 2), key='export_collection_btn', enable_events=True)]]
 
     imagesAnnotationsTable = sg.Table(values=[['', '']], headings=[
                                       "Annotation", "Value"], auto_size_columns=False, col_widths=200, num_rows=10, key='imagesAnnotationsTable', enable_events=True, max_col_width=200, expand_x=True)
@@ -370,8 +385,8 @@ class Main:
                  [sg.Button('Annotate', size=(8, 2)),
                  sg.Button('Filter/Classify', size=(10, 2))]]
 
-    layout = [[sg.Column(col_collections, size=(200, 820)),
-               sg.Column(col_files, size=(400, 820)), sg.Column(col, size=(800, 820))]]
+    layout = [[sg.Column(col_collections, size=(200, 850)),
+               sg.Column(col_files, size=(400, 850)), sg.Column(col, size=(800, 850))]]
 
     window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
@@ -538,6 +553,12 @@ class Main:
                 self.UpdateImagesList(values)
             elif event == "Load agents":
                 backend.ReloadAgents()
+            elif event == "export_collection_btn":
+                location = sg.popup_get_folder(
+                    "Select folder to export collection to.")
+                if (location == None):
+                    continue
+                backend.ExportCollection(self.collection, location)
             else:
                 if len(self.images) > 0:
                     self.filename = self.images[self.i]
