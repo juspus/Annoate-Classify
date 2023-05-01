@@ -1,0 +1,15 @@
+name: "Dominant color annotator"
+alias: "dominant-color-agent"
+creator: "Justas Puodzius"
+runtime:
+  main: "dominant_color.py"
+
+description: "Annotation agent used for extracting dominant colors from an image."
+version: "0.0.1"
+repository: "http/repo/repo.com"
+annotation_agent: true
+variables:
+
+requirements:
+  - name: "colorthief"
+    version: "0.2.1"

@@ -17,6 +17,7 @@ class TestAgent(AnnotationPluginCore):
     @staticmethod
     def analyzePhoto(image_path: str) -> AnnotationAct:
         image = cv2.imread(image_path)
+        image = cv2.resize(image, (150, 150), interpolation=cv2.INTER_AREA)
 
         redCount = 0
         greenCount = 0
@@ -38,7 +39,7 @@ class TestAgent(AnnotationPluginCore):
         greenPerc = greenCount/allCount
         bluePerc = blueCount/allCount
 
-        #average = image.mean(axis=0).mean(axis=0)
+        # average = image.mean(axis=0).mean(axis=0)
 
         return [AnnotationAct(
                 name='blue_perc',

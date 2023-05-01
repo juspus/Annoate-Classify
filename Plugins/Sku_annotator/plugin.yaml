@@ -1,0 +1,27 @@
+name: "Sku ID annotator"
+alias: "sku-agent"
+creator: "Zygimantas Lukosevicius"
+runtime:
+  main: "sku-classifier.py"
+
+description: "Annotation agent used for classifying sku."
+version: "0.0.1"
+repository: "http/repo/repo.com"
+annotation_agent: true
+variables:
+  - name: "sku_id"
+    vtype: "int"
+
+requirements:
+  - name: "numpy"
+    version: "1.24.2"
+  - name: "opencv-python"
+    version: "4.6.0.66"
+  - name: "torch"
+    version: "2.0.0"
+  - name: "torchvision"
+    version: "0.15.1"
+  - name: "albumentations"
+    version: "3.1.0"
+  - name: "onnxruntime"
+    version: "1.14.1"

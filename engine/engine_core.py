@@ -44,6 +44,10 @@ class PluginEngine:
                 if override:
                     AnnotationAct.delete().where((AnnotationAct.agent == plugin.meta.name)
                                                  & (AnnotationAct.image == image)).execute()
+                if analysis is None:
+                    print("No analysis returned from plugin " +
+                          plugin.meta.name + "on image " + image + ".")
+                    continue
                 for a in analysis:
                     a.agent = plugin.meta.name
                     a.image = image

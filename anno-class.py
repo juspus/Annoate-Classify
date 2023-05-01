@@ -107,15 +107,18 @@ class Backend():
 
     def DeleteSelectedImagesInCollection(self, collection, images):
         dbImages = self.GetSelectedImagesInDb(images)
-        if collection == None:
-            return
+
         ans = sg.PopupYesNo(
             "Do want to delete the selected images from the database aswell?")
-        col = Collection.get(Collection.name == collection)
-        for i in dbImages:
-            imInCol = ImageInCollection.get(
-                ImageInCollection.collection == col, ImageInCollection.image == i)
-            imInCol.delete_instance()
+        if collection != None:
+            col = Collection.get(Collection.name == collection)
+            for i in dbImages:
+                try:
+                    imInCol = ImageInCollection.get(
+                        ImageInCollection.collection == col, ImageInCollection.image == i)
+                    imInCol.delete_instance()
+                except Exception as e:
+                    print(e)
         if ans == "Yes":
             for i in dbImages:
                 i.delete_instance()
@@ -160,13 +163,6 @@ class Backend():
             combo = ImageAnoCombo(im.Path, list(query))
 
             imAno.append(combo)
-
-        # isinstance = FilterInstance()
-        # isinstance.configs = configs
-        # isinstance.filter = FilterAgent.select().where(
-        # FilterAgent.alias == "test-filter-agent")
-
-        # print(imAno[1].path)
 
         filteredImages = self.pe.start_filters(imAno, filters)
         return filteredImages
@@ -282,12 +278,12 @@ def load_images_to_db():
 # ------------------------------------------------------------------------------
 
 
-def get_img_data(f, maxsize=(800, 620), first=False):
+def get_img_data(f, maxsize=(800, 420), first=False):
     """Generate image data using PIL
     """
     img = PILIM.open(f)
     img.thumbnail(maxsize)
-    if first:                     # tkinter is inactive the first time
+    if first:                     # tkinter is inactivep the first time
         bio = io.BytesIO()
         img.save(bio, format="PNG")
         del img
@@ -333,6 +329,10 @@ class FilterWin:
                     break
                 self.filtered_images = backend.StartFilter(
                     self.images, self.filter)
+
+                if self.filtered_images == None or len(self.filtered_images) == 0:
+                    sg.Popup("No images found for this filter")
+                    break
                 for i in self.filtered_images:
                     col_name = uuid.uuid4()
                     collection = Collection.create(name=uuid.uuid4())
@@ -340,6 +340,7 @@ class FilterWin:
                         ImageInCollection.create(
                             collection=collection, image=Image.get(Image.Path == image))
                 print(self.filtered_images)
+                break
         self.window.close()
 
 
@@ -363,10 +364,10 @@ class Main:
     filename_display_elem = sg.Text(filename, size=(80, 1))
 
     imagesList = sg.Listbox(values=images, enable_events=True,
-                            size=(60, 40), key='listbox_images', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED, expand_y=True)
+                            size=(60, 25), key='listbox_images', select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED, expand_y=True)
 
     collections_list = sg.Listbox(values=collections, select_mode=sg.LISTBOX_SELECT_MODE_BROWSE, size=(
-        20, 40), key=collectionSelectedKey, enable_events=True, expand_y=True)
+        20, 25), key=collectionSelectedKey, enable_events=True, expand_y=True)
     # define layout, show and read the form
     col_collections = [[sg.Button('Open folder', size=(16, 1), key='open_folder_btn', enable_events=True)],
                        [sg.Text('Collections', size=(10, 1))],
@@ -377,7 +378,7 @@ class Main:
 
     imagesAnnotationsTable = sg.Table(values=[['', '']], headings=[
                                       "Annotation", "Value"], auto_size_columns=False, col_widths=200, num_rows=10, key='imagesAnnotationsTable', enable_events=True, max_col_width=200, expand_x=True)
-    col = [[image_elem], [imagesAnnotationsTable]]
+    col = [[image_elem]]
 
     col_files = [[sg.Button('Save as', size=(8, 1), key='save_as_btn', enable_events=True), sg.Button('Clear selection (select all)', size=(20, 1), key='clear_selection_btn', enable_events=True), sg.Button("Delete", size=(8, 1), enable_events=True), filename_display_elem],
                  [sg.Text('Images', size=(10, 1))],
@@ -385,8 +386,11 @@ class Main:
                  [sg.Button('Annotate', size=(8, 2)),
                  sg.Button('Filter/Classify', size=(10, 2))]]
 
-    layout = [[sg.Column(col_collections, size=(200, 850)),
-               sg.Column(col_files, size=(400, 850)), sg.Column(col, size=(800, 850))]]
+    mainLayout = [[sg.Column(col_collections, size=(200, 650)),
+                   sg.Column(col_files, size=(400, 650)), sg.Column(col, size=(800, 650))]]
+
+    layout = [[sg.Column(mainLayout, size=(1400, 650))],
+              [imagesAnnotationsTable]]
 
     window = sg.Window('AnnoClass', layout, return_keyboard_events=True,
                        location=(0, 0), use_default_focus=False, text_justification="top", auto_size_buttons=True)
